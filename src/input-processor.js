@@ -225,6 +225,7 @@ class InputProcessor {
 
         const shouldReview = file => {
             const filePath = file.filename.replace(/\\/g, "/");
+            file.path = filePath;
             const ext = path.posix.extname(filePath);
 
             const extAllowed = !incExt.length || incExt.includes(ext);

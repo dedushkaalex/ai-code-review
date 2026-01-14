@@ -161,6 +161,7 @@ Please review these files for issues. Use the provided tools to add comments or 
 
 
     async handleMessageResponse(message, tools, reviewState) {
+        core.info(`RAW AI MESSAGE: ${JSON.stringify(message, null, 2)}`);
         if (!message) {
             throw new Error("Invalid response from Perplexity API");
         }

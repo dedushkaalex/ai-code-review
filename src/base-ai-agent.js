@@ -32,14 +32,16 @@ class SimpleMutex {
 }
 
 class BaseAIAgent {
-    constructor(apiKey, fileContentGetter, fileCommentator, model, reviewRulesContent) {
+    constructor(apiKey, fileContentGetter, fileCommentator, model, reviewRulesContent, language = 'English') {
         this.apiKey = apiKey;
         this.fileContentGetter = fileContentGetter;
         this.fileCommentator = fileCommentator;
         this.model = model;
         this.reviewRulesContent = reviewRulesContent;
+        this.language = language;
         this.fileCache = new Map();
         this.cacheMutex = new SimpleMutex();
+        this.comments = [];
         this.MAX_CACHE_ENTRIES = constants.MAX_CACHE_ENTRIES;
     }
 
@@ -77,7 +79,9 @@ When complete, call the mark_as_done tool with a brief summary of the review. Th
 
 Lines are 1-indexed. Do not comment on trivial issues or style preferences.
 Be concise but thorough in your review.
-=> MODE NO-FALSE-POSITIVES IS ON.`;
+=> MODE NO-FALSE-POSITIVES IS ON.
+
+All your responses (comments and summary) MUST be in the following language: ${this.language}.`;
 
         if (this.reviewRulesContent) {
             prompt += `\n\nAdditionally, adhere to the following custom review rules:\n${this.reviewRulesContent}`;
@@ -168,13 +172,17 @@ Be concise but thorough in your review.
             this.handleError(new Error(validationError), "Validation error", false);
             return validationError;
         }
-        try {
-            await this.fileCommentator(foundErrorDescription, fileName, side, startLineNumber, endLineNumber);
-            return "Success! The review comment has been published.";
-        } catch (error) {
-            this.handleError(error, "Error creating review comment", false);
-            return `Error! Please ensure that the lines you specify for the comment are part of the DIFF! Error message: ${error.message}`;
-        }
+
+        const comment = {
+            path: fileName,
+            line: endLineNumber,
+            body: foundErrorDescription,
+            side: side,
+            start_line: startLineNumber,
+        };
+        this.comments.push(comment);
+
+        return "Success! The review comment has been noted and will be published with the final review.";
     }
 
     doReview(_changedFiles) {

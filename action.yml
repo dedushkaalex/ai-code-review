@@ -82,6 +82,10 @@ inputs:
   review_rules_file:
     description: 'Path to a file containing custom review rules to be added to the AI system prompt.'
     required: false
+  language:
+    description: 'The language for the AI review comments (e.g., "English", "Spanish", "Russian").'
+    required: false
+    default: 'English'
 
 runs:
   using: 'node20'

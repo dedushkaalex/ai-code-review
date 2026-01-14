@@ -14,16 +14,27 @@ const main = async () => {
         }
         
         const aiAgent = inputProcessor.getAIAgent();
-        const reviewSummary = await aiAgent.doReview(inputProcessor.filteredDiffs);
-        if (!reviewSummary || typeof reviewSummary !== 'string' || reviewSummary.trim() === '') {
+        const reviewResult = await aiAgent.doReview(inputProcessor.filteredDiffs);
+
+        if (reviewResult.comments && reviewResult.comments.length > 0) {
+            await inputProcessor.githubAPI.createReview(
+                inputProcessor.owner,
+                inputProcessor.repo,
+                inputProcessor.pullNumber,
+                inputProcessor.headCommit,
+                reviewResult.comments
+            );
+        }
+
+        if (!reviewResult.summary || typeof reviewResult.summary !== 'string' || reviewResult.summary.trim() === '') {
             throw new Error('AI Agent did not return a valid review summary');
         }
 
-        const commentBody = `${AI_REVIEW_COMMENT_PREFIX}${inputProcessor.headCommit}${SUMMARY_SEPARATOR}${reviewSummary}`;
+        const commentBody = `${AI_REVIEW_COMMENT_PREFIX}${inputProcessor.headCommit}${SUMMARY_SEPARATOR}${reviewResult.summary}`;
         await inputProcessor.githubAPI.createPRComment(
-            inputProcessor.owner, 
-            inputProcessor.repo, 
-            inputProcessor.pullNumber, 
+            inputProcessor.owner,
+            inputProcessor.repo,
+            inputProcessor.pullNumber,
             commentBody
         );
 

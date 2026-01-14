@@ -88,6 +88,7 @@ class InputProcessor {
         this._fileCommentator = null;
         this._reviewRulesFile = null;
         this._reviewRulesContent = null;
+        this._language = null;
     }
 
     /* ----------------------------- Public API ------------------------------ */
@@ -119,6 +120,7 @@ class InputProcessor {
         this._includePaths = sanitizePath(core.getInput("include_paths"));
         this._excludePaths = sanitizePath(core.getInput("exclude_paths"));
         this._reviewRulesFile = sanitizePath(core.getInput("review_rules_file"));
+        this._language = sanitizeString(core.getInput("language"));
 
         if (!this._includeExtensions) {
             core.info("Using default: include all extensions");
@@ -135,6 +137,10 @@ class InputProcessor {
 
         if (!this._reviewRulesFile) {
             core.info("No custom review rules file specified.");
+        }
+
+        if (!this._language) {
+            core.info("No language specified, defaulting to English.");
         }
     }
 
@@ -275,17 +281,17 @@ class InputProcessor {
     getAIAgent() {
         switch (this._aiProvider) {
             case "openai":
-                return new OpenAIAgent(this._apiKey, this._fileContentGetter, this._fileCommentator, this._model, this._reviewRulesContent);
+                return new OpenAIAgent(this._apiKey, this._fileContentGetter, this._fileCommentator, this._model, this._reviewRulesContent, this._language);
             case "anthropic":
-                return new AnthropicAgent(this._apiKey, this._fileContentGetter, this._fileCommentator, this._model, this._reviewRulesContent);
+                return new AnthropicAgent(this._apiKey, this._fileContentGetter, this._fileCommentator, this._model, this._reviewRulesContent, this._language);
             case "google":
-                return new GoogleAgent(this._apiKey, this._fileContentGetter, this._fileCommentator, this._model, this._reviewRulesContent);
+                return new GoogleAgent(this._apiKey, this._fileContentGetter, this._fileCommentator, this._model, this._reviewRulesContent, this._language);
             case "deepseek":
-                return new DeepseekAgent(this._apiKey, this._fileContentGetter, this._fileCommentator, this._model, this._reviewRulesContent);
+                return new DeepseekAgent(this._apiKey, this._fileContentGetter, this._fileCommentator, this._model, this._reviewRulesContent, this._language);
             case "x":
-                return new XAgent(this._apiKey, this._fileContentGetter, this._fileCommentator, this._model, this._reviewRulesContent);
+                return new XAgent(this._apiKey, this._fileContentGetter, this._fileCommentator, this._model, this._reviewRulesContent, this._language);
             case "perplexity":
-                return new PerplexityAgent(this._apiKey, this._fileContentGetter, this._fileCommentator, this._model, this._reviewRulesContent);
+                return new PerplexityAgent(this._apiKey, this._fileContentGetter, this._fileCommentator, this._model, this._reviewRulesContent, this._language);
             default:
                 throw new Error(`Unsupported AI provider: ${this._aiProvider}`);
         }

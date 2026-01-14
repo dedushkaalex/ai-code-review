@@ -113,6 +113,18 @@ class GitHubAPI {
         }
     }
 
+    async createReview(owner, repo, prNumber, commitId, comments) {
+        core.info(`createReview(${prNumber}, ${commitId})`);
+        await this.octokit.rest.pulls.createReview({
+            owner,
+            repo,
+            pull_number: prNumber,
+            commit_id: commitId,
+            comments,
+            event: 'COMMENT',
+        });
+    }
+
     async createPRComment(owner, repo, prNumber, body) {
         core.info(`createPRComment(${body})`);
         await this.octokit.rest.issues.createComment({

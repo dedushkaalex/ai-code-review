@@ -13,8 +13,8 @@ const { MAX_REVIEW_ITERATIONS } = require("./constants");
  * **Public API is unchanged**; only internal loop/iteration logic was fixed.
  */
 class OpenAIAgent extends BaseAIAgent {
-    constructor(apiKey, fileContentGetter, fileCommentator, model, reviewRulesContent, baseURL = null) {
-        super(apiKey, fileContentGetter, fileCommentator, model, reviewRulesContent);
+    constructor(apiKey, fileContentGetter, fileCommentator, model, reviewRulesContent, language, baseURL = null) {
+        super(apiKey, fileContentGetter, fileCommentator, model, reviewRulesContent, language);
 
         if (!baseURL || baseURL.trim() === "") {
             core.info("Using default OpenAI API URL");
@@ -266,7 +266,7 @@ class OpenAIAgent extends BaseAIAgent {
             });
             const initialMessage = initial.choices[0].message;
             reviewSummary = await this.handleMessageResponse(initialMessage, reviewState);
-            return reviewSummary;
+            return { summary: reviewSummary, comments: this.comments };
         } catch (error) {
             core.error(`OpenAI API error: ${error.message}`);
             if (error.response) {
